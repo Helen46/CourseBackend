@@ -1,69 +1,17 @@
-from fastapi import  FastAPI, Query, Body
+from fastapi import  FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 import uvicorn
 
-app = FastAPI()
+from hotels import router as router_hotels
 
+app = FastAPI(docs_url=None)
+
+app.include_router(router_hotels)
 
 hotels = [
     {"id": 1, "title": "Sochi", "name": "sochi"},
     {"id": 2, "title": "Dubai", "name": "dubai"}
 ]
-
-
-@app.get("/hotels")
-def get_hotels(
-        id: int | None = Query(None, description="Айдишник"),
-        title: str | None = Query(None, description="Название отеля")
-):
-    return [hotel for hotel in hotels if hotel["title"] == title or hotel["id"] == id]
-
-
-@app.post("/hotels")
-def create_hotel(
-        title: str = Body(embed=True),
-):
-    global hotels
-    hotels.append({
-        "id": hotels[-1]["id"] + 1,
-        "title": title
-    })
-    return {"status": "OK"}
-
-
-@app.put("/hotels/{hotel_id}")
-def change_hotel(
-        hotel_id: int,
-        title: str = Body(),
-        name: str = Body()
-):
-    global hotels
-    hotel = [hotel for hotel in hotels if hotel["id"] == hotel_id][0]
-    hotel["title"] = title
-    hotel["name"] = name
-    return {"status": "OK"}
-
-
-@app.patch("/hotels/{hotel_id}")
-def change_part_hotel(
-        hotel_id: int,
-        title: str | None = Body(None),
-        name: str | None = Body(None)
-):
-    global hotels
-    hotel = [hotel for hotel in hotels if hotel["id"] == hotel_id][0]
-    if title:
-        hotel["title"] = title
-    if name:
-        hotel["name"] = name
-    return {"status": "OK"}
-
-
-@app.delete("/hotels/{hotel_id}")
-def delete_hotel(hotel_id: int):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
-    return {"status": "OK"}
 
 
 @app.get("/docs", include_in_schema=False)
